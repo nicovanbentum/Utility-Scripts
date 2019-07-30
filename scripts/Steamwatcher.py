@@ -5,6 +5,7 @@ import os
 import time
 import subprocess
 import winreg as reg
+import pyparsing as pp
 import colorama
 
 def get_download_dirs():
@@ -15,31 +16,43 @@ def get_download_dirs():
     if os.path.isdir(dl_folder):
         dirs.append(dl_folder)
 
-    # Read the steam vdf file that contains path strings to all 
+    # Read the steam vdf file that contains path strings to all
     # game install directories.
     file = None
     try:
-        file = open(steam_path + "/steamapps/LibraryFolders.vdf", 'r')
+        file = open(steam_path + "/steamapps/LibraryFolders.vdf").read()
     except OSError:
         print("Unable to open {}.".format(steam_path + "/steamapps/LibraryFolders.vdf"))
 
     # parse Valve's weird cfg format (its like a shitty version of JSON)
-    # we strip all whitespace and new lines, strip the line of any starting
-    # and ending " characters, then split on "" to seperate the two elements
-    # there's probably a cleaner way to do this but whatever.
-    tostrip = ['\t', '\n']
-    for line in file:
-        for c in tostrip:
-            line = line.replace(c, '')
-        line = line.strip('"')
-        line = line.split("\"\"")
-        if line[0].isdigit():
-            fp = line[1] + "\\steamapps\\downloading"
-            if os.path.isdir(fp):
-                dirs.append(fp)
+    # forward declare the value of a key
+    value = pp.Forward()
+    # expression for our dict structure that looks like: ["key1", value]
+    key_value = pp.Group(pp.QuotedString('"') + value)
+    # create a parse structure for value so value looks like: c
+    expression = pp.Suppress('{') + pp.Dict(pp.ZeroOrMore(key_value)) + pp.Suppress('}')
+    # set our value to be a quoted string follow by the structure we defined, looks like this in Python:
+    # ["outer_key", { ["inner_key1", value], ["inner_key2", value] } ]
+    # we can acess the above as either a dict or array.
+    value <<= pp.QuotedString('"') | expression
+    parser = pp.Dict(key_value)
+    content = parser.parseString(file)
+    # get the last pair's key, this should be the last folder numbered folder,
+    # so we can use it as our max nr of folders for looping.
+    max_folders = int(content["LibraryFolders"][-1][0])
+
+    # loop from 1 to (incl) max folders and use it as a dictionary key to get
+    # the value of that key which should be a steam library folder path.
+    for i in range(1, max_folders + 1):
+        libpath = content["LibraryFolders"][str(i)]
+        dlpath = libpath + "\\steamapps\\downloading"
+        if os.path.isdir(dlpath):
+            dirs.append(dlpath)
     return dirs
 
 DIRS = get_download_dirs()
+for directory in DIRS:
+    print("Found " + directory)
 
 def get_size(start_path='.'):
     total_size = 0
@@ -74,7 +87,7 @@ def main():
         return
 
     while updating(last_size, new_size):
-        print('\033[1m' + "Updating..")
+        print('\033[1m' + "Updating.. (60 seconds timeout)")
         last_size = get_all()
         time.sleep(60)
         new_size = get_all()
