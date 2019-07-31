@@ -15,15 +15,12 @@ def get_download_dirs():
     dl_folder = steam_path + "/steamapps/downloading"
     if os.path.isdir(dl_folder):
         dirs.append(dl_folder)
-
     # Read the steam vdf file that contains path strings to all
     # game install directories.
-    file = None
     try:
         file = open(steam_path + "/steamapps/LibraryFolders.vdf").read()
     except OSError:
         print("Unable to open {}.".format(steam_path + "/steamapps/LibraryFolders.vdf"))
-
     # parse Valve's weird cfg format (its like a shitty version of JSON)
     # forward declare the value of a key
     value = pp.Forward()

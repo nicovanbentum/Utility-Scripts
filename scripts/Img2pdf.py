@@ -10,7 +10,6 @@ from PIL import Image
 
 def img2pdf(fp, out):
     file = os.path.basename(fp)
-    img = None
     try:
         img = Image.open(fp)
     except OSError:
