@@ -209,7 +209,7 @@ class Application:
         self.log("Updating finished. \n")
         self.log("Shutting down computer. \n")
         self.running = False
-        #subprocess.call(["shutdown", "/s"])
+        subprocess.call(["shutdown", "/s"])
 
     def watch_thread(self):
         if self.running:
