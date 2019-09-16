@@ -106,9 +106,14 @@ class Application:
         button_frame = tk.Frame(self.window)
         button_frame.pack(side=tk.BOTTOM)
 
-        self.logger = tk.scrolledtext.ScrolledText(self.window, height=100, width=100, font="Courier 10")
+        self.logger = tk.scrolledtext.ScrolledText(
+            self.window, height=100, width=100, font="Courier 10")
         self.logger.pack(side=tk.LEFT)
-        self.logger.tag_config("green", foreground="green", font="courier 10 bold")
+
+        self.logger.tag_config(
+            "green", foreground="green", font="courier 10 bold")
+        self.logger.tag_config(
+            "orange", foreground="orange", font="courier 10 bold")
         self.logger.tag_config("red", foreground="red", font="courier 10 bold")
 
         self.steam_btn = tk.Button(button_frame, text="Add Steam",
@@ -223,6 +228,11 @@ class Application:
         if self.running:
             tkinter.messagebox.showwarning(
                 "Warning", "Please stop the Watcher.")
+            return
+
+        if not self.watcher.get_folders():
+            self.log("Warning: ", "orange")
+            self.log("No directories added. \n")
             return
         self.thread = threading.Thread(target=self.watch)
         self.thread.start()
