@@ -9,6 +9,7 @@ import winreg as reg
 import tkinter as tk
 import tkinter.filedialog
 import tkinter.messagebox
+import tkinter.scrolledtext
 import pyparsing as pp
 
 
@@ -105,29 +106,29 @@ class Application:
         button_frame = tk.Frame(self.window)
         button_frame.pack(side=tk.BOTTOM)
 
-        self.logger = tk.Text(self.window, height=100, width=100)
+        self.logger = tk.scrolledtext.ScrolledText(self.window, height=100, width=100, font="Courier 10")
         self.logger.pack(side=tk.LEFT)
-        self.logger.tag_config("green", foreground="green")
-        self.logger.tag_config("red", foreground="red")
+        self.logger.tag_config("green", foreground="green", font="courier 10 bold")
+        self.logger.tag_config("red", foreground="red", font="courier 10 bold")
 
         self.steam_btn = tk.Button(button_frame, text="Add Steam",
-                                   command=self.load_steam_folders)
+                                   command=self.load_steam_folders, padx=2, pady=2)
         self.steam_btn.pack(side=tk.LEFT)
 
         self.folder_btn = tk.Button(button_frame, text="Add Folder",
-                                    command=self.ask)
+                                    command=self.ask, padx=2, pady=2)
         self.folder_btn.pack(side=tk.LEFT)
 
         self.clear_btn = tk.Button(button_frame, text="Clear",
-                                   command=self.clear)
+                                   command=self.clear, padx=2, pady=2)
         self.clear_btn.pack(side=tk.LEFT)
 
         self.start_btn = tk.Button(button_frame, text="Start",
-                                   command=self.watch_thread)
+                                   command=self.watch_thread, padx=2, pady=2)
         self.start_btn.pack(side=tk.LEFT)
 
         self.stop_btn = tk.Button(button_frame, text="Stop",
-                                  command=self.stop)
+                                  command=self.stop, padx=2, pady=2)
         self.stop_btn.pack(side=tk.LEFT)
 
         self.thread = None
@@ -140,6 +141,7 @@ class Application:
     def log(self, text: str, color="black"):
         self.logger.config(state=tk.NORMAL)
         self.logger.insert(tk.END, text, (color))
+        self.logger.see("end")
         self.logger.config(state=tk.DISABLED)
 
     def ask(self):
