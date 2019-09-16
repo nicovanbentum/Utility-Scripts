@@ -2,7 +2,6 @@
 and shuts down the computer when they are all finished. """
 
 import os
-import time
 import signal
 import threading
 import subprocess
@@ -11,7 +10,7 @@ import tkinter as tk
 import tkinter.filedialog
 import tkinter.messagebox
 import pyparsing as pp
-import colorama
+
 
 class Watcher:
     def __init__(self):
@@ -21,7 +20,7 @@ class Watcher:
     def ask(self):
         folder = tk.filedialog.askdirectory()
         self.directories.add(folder)
-    
+
     def load_steam_folders(self):
         if self.loaded_steam:
             return
@@ -36,15 +35,18 @@ class Watcher:
         try:
             file = open(steam_path + "/steamapps/LibraryFolders.vdf").read()
         except OSError:
-            print("Unable to open {}.".format(steam_path + "/steamapps/LibraryFolders.vdf"))
+            print("Unable to open {}.".format(
+                steam_path + "/steamapps/LibraryFolders.vdf"))
         # parse Valve's weird cfg format (its like a shitty version of JSON)
         # forward declare the value of a key
         value = pp.Forward()
         # expression for our dict structure that looks like: ["key1", value]
         key_value = pp.Group(pp.QuotedString('"') + value)
         # create a parse structure for value so value looks like: c
-        expression = pp.Suppress('{') + pp.Dict(pp.ZeroOrMore(key_value)) + pp.Suppress('}')
-        # set our value to be a quoted string follow by the structure we defined, looks like this in Python:
+        expression = pp.Suppress(
+            '{') + pp.Dict(pp.ZeroOrMore(key_value)) + pp.Suppress('}')
+        # set our value to be a quoted string follow by the structure we defined,
+        # looks like this in Python:
         # ["outer_key", { ["inner_key1", value], ["inner_key2", value] } ]
         # we can acess the above as either a dict or array.
         value <<= pp.QuotedString('"') | expression
@@ -91,14 +93,15 @@ class Watcher:
     def get_folders(self):
         return self.directories
 
+
 class Application:
     def __init__(self):
         self.watcher = Watcher()
-        
+
         self.window = tk.Tk()
         self.window.title("Download Watcher")
         self.window.geometry('500x360')
-        
+
         button_frame = tk.Frame(self.window)
         button_frame.pack(side=tk.BOTTOM)
 
@@ -108,23 +111,23 @@ class Application:
         self.logger.tag_config("red", foreground="red")
 
         self.steam_btn = tk.Button(button_frame, text="Add Steam",
-        command=self.load_steam_folders)
+                                   command=self.load_steam_folders)
         self.steam_btn.pack(side=tk.LEFT)
-        
+
         self.folder_btn = tk.Button(button_frame, text="Add Folder",
-        command=self.ask)
+                                    command=self.ask)
         self.folder_btn.pack(side=tk.LEFT)
 
-        self.clear_btn = tk.Button(button_frame, text="Clear", 
-        command=self.clear)
+        self.clear_btn = tk.Button(button_frame, text="Clear",
+                                   command=self.clear)
         self.clear_btn.pack(side=tk.LEFT)
-        
+
         self.start_btn = tk.Button(button_frame, text="Start",
-        command=self.watch_thread)
+                                   command=self.watch_thread)
         self.start_btn.pack(side=tk.LEFT)
 
         self.stop_btn = tk.Button(button_frame, text="Stop",
-        command=self.stop)
+                                  command=self.stop)
         self.stop_btn.pack(side=tk.LEFT)
 
         self.thread = None
@@ -141,7 +144,8 @@ class Application:
 
     def ask(self):
         if self.running:
-            tkinter.messagebox.showwarning("Warning", "Please stop the Watcher.")
+            tkinter.messagebox.showwarning(
+                "Warning", "Please stop the Watcher.")
             return
         folders_copy = self.watcher.get_folders().copy()
         self.watcher.ask()
@@ -152,7 +156,8 @@ class Application:
 
     def clear(self):
         if self.running:
-            tkinter.messagebox.showwarning("Warning", "Please stop the Watcher.")
+            tkinter.messagebox.showwarning(
+                "Warning", "Please stop the Watcher.")
             return
         self.watcher.clear()
         self.logger.config(state=tk.NORMAL)
@@ -161,7 +166,8 @@ class Application:
 
     def load_steam_folders(self):
         if self.running:
-            tkinter.messagebox.showwarning("Warning", "Please stop the Watcher.")
+            tkinter.messagebox.showwarning(
+                "Warning", "Please stop the Watcher.")
             return
         folders_copy = self.watcher.get_folders().copy()
         self.watcher.load_steam_folders()
@@ -174,10 +180,10 @@ class Application:
         self.running = True
         self.timer.clear()
         self.log("Checking for active downloads.. \n")
-        
-        last_size = self.watcher.folder_sizes() # random initial value
+
+        last_size = self.watcher.folder_sizes()  # random initial value
         self.timer.wait(timeout=10)
-        new_size = self.watcher.folder_sizes() # random initial value
+        new_size = self.watcher.folder_sizes()  # random initial value
 
         if self.timer.is_set():
             self.log("Watcher stopped. \n", color="red")
@@ -192,7 +198,7 @@ class Application:
             self.log("Updates ")
             self.log("found. \n", color="green")
             self.log("Updating.. \n")
- 
+
         while self.watcher.is_updating(last_size, new_size):
             last_size = self.watcher.folder_sizes()
             if not self.timer.is_set():
@@ -213,7 +219,8 @@ class Application:
 
     def watch_thread(self):
         if self.running:
-            tkinter.messagebox.showwarning("Warning", "Please stop the Watcher.")
+            tkinter.messagebox.showwarning(
+                "Warning", "Please stop the Watcher.")
             return
         self.thread = threading.Thread(target=self.watch)
         self.thread.start()
@@ -229,15 +236,16 @@ class Application:
 
     def on_exit(self):
         if self.running:
-            tkinter.messagebox.showwarning("Warning", "Please stop the Watcher.")
+            tkinter.messagebox.showwarning(
+                "Warning", "Please stop the Watcher.")
         else:
             self.window.destroy()
+
 
 def main():
     app = Application()
     app.run()
 
+
 if __name__ == "__main__":
     main()
-
-    
