@@ -52,6 +52,7 @@ class Application:
         self.ax[1].set_xlabel('frequency [Hz]')
         self.ax[1].set_ylabel('|amplitude|')
 
+        self.wavFile = None
         self.timeData = None
         self.freqData = None
     
@@ -105,7 +106,7 @@ class Application:
         else:
             return
 
-        self.ax[0].plot(np.arange(44100)/44100, filteredTimeData)
+        self.ax[0].plot(np.arange(self.wavFile.getnframes())/self.wavFile.getframerate(), filteredTimeData)
         self.ax[1].plot(filteredFreqData)
         self.canvas.draw()
         self.toolbar.update()
@@ -124,7 +125,7 @@ class Application:
         self.ax[1].set_ylabel('|amplitude|')
 
         if self.timeData is not None and self.freqData is not None:
-            self.ax[0].plot(np.arange(44100)/44100, self.timeData)
+            self.ax[0].plot(np.arange(self.wavFile.getnframes())/self.wavFile.getframerate(), self.timeData)
             self.ax[1].plot(self.freqData)
             self.canvas.draw()
             self.toolbar.update()
@@ -135,18 +136,17 @@ class Application:
             filetypes=[("Wave files", "*.wav")])
 
         try:
-            activeWaveFile = wave.open(file_path, 'r')
+            self.wavFile = wave.open(file_path, 'r')
         except:
             print("invalid file (not 16bit signed WAV")
             return
 
-        sz = 44100
         self.timeData = np.frombuffer(
-            activeWaveFile.readframes(sz), dtype=np.int16)
+            self.wavFile.readframes(self.wavFile.getnframes()), dtype=np.int16)
         self.timeData = self.timeData[0::2]
         self.freqData = abs(np.fft.rfft(self.timeData))
 
-        self.ax[0].plot(np.arange(44100)/44100, self.timeData)
+        self.ax[0].plot(np.arange(self.wavFile.getnframes())/self.wavFile.getframerate(), self.timeData)
         self.ax[1].plot(self.freqData)
 
         self.canvas.draw()
