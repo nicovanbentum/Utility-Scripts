@@ -86,7 +86,7 @@ class MatplotlibWidget(QMainWindow):
         if method == 'Median':
             k = self.median_filter_slider.value() // 2 * 2 + 1
             return sp.medfilt(data, k)
-        elif method == 'Moving average':
+        elif method == 'Moving Average':
             k = self.moving_average_slider.value()
             return self.moving_average(data, k)
         elif method == 'FIR':
