@@ -2,7 +2,7 @@
 Collection of useful Python/Bash scripts.
 
 ### Requirements
-- Python 3.x
+- Python 3.10
 - PIP
 
 Run `pip install -r requirements.txt` to install third-party dependencies.
