@@ -22,5 +22,5 @@ Python script to convert any .jpg, .jpeg, .png, .bmp, .tga file(s) to a single p
 - **Wav Filter:**
 Python GUI script that takes any .wav file as input and can perform various filter operations in both frequency and time domain.
 
-- **Image Knerels:**
-- Python GUI script for running arbitrary kernels over an image file.
+- **Image Kernels:**
+Python GUI script for running arbitrary kernels over an image file.
