@@ -28,9 +28,6 @@ class Watcher:
 
         hkey = reg.OpenKey(reg.HKEY_CURRENT_USER, "Software\\Valve\\Steam")
         steam_path = reg.QueryValueEx(hkey, "SteamPath")[0]
-        dl_folder = steam_path + "/steamapps/downloading"
-        if os.path.isdir(dl_folder):
-            self.directories.add(dl_folder)
         # Read the steam vdf file that contains path strings to all
         # game install directories.
         try:
@@ -53,17 +50,14 @@ class Watcher:
         value <<= pp.QuotedString('"') | expression
         parser = pp.Dict(key_value)
         content = parser.parseString(file)
-        # get the last pair's key, this should be the last folder numbered folder,
-        # so we can use it as our max nr of folders for looping.
-        max_folders = int(content["LibraryFolders"][-1][0])
 
-        # loop from 1 to (incl) max folders and use it as a dictionary key to get
-        # the value of that key which should be a steam library folder path.
-        for i in range(1, max_folders + 1):
-            libpath = content["LibraryFolders"][str(i)]
-            dlpath = libpath + "\\steamapps\\downloading"
-            if os.path.isdir(dlpath):
-                self.directories.add(dlpath)
+        for entry in content["libraryfolders"]:
+            for key, val in entry.items():
+                if key == "path":
+                    dlpath = val + "\\steamapps\\downloading"
+                    if os.path.isdir(dlpath):
+                        self.directories.add(dlpath)
+
         self.loaded_steam = True
 
     def folder_size(self, start_path='.'):
